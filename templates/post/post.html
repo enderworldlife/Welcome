@@ -1,0 +1,63 @@
+
+{% extends 'base.html' %}
+{% block title %}
+Post
+{% endblock %}
+{% block body %}
+
+<h1>Post</h1>
+<img width="50%" src="../{{post.upload}}" alt="">
+<p>Title: {{post.title}}</p>
+<p>User: {{user.nickname}}</p>
+
+<p>Text: {{post.text}}</p>
+
+{% if curent_user.id == post.user_id %}
+<a style="color: green;">Update</a>
+{% endif %}
+{% if curent_user.id == post.user_id or curent_user.admin %}
+<a style="color: red;" href="/delete_post/{{post.id}}">Delete</a>
+{% endif %}
+
+
+
+
+<div>
+    <p>Comments: </p>
+    {% for comment, user in comments %}
+    <div>
+        <img width="25%" src="../{{comment.upload}}" alt=""> <br>
+        <p>User: {{user.nickname}}</p>
+        <p>Text: {{comment.text}}</p>
+        <p>Date: {{comment.date}}</p>
+        {% if curent_user == user.id or curent_user.admin %}
+        <a style="color: red;" href="/delete_comment/{{comment.id}}">Delete</a>
+        {% endif %}
+    </div>
+
+    {% endfor %}
+
+</div>
+
+
+
+
+
+{% if curent_user %}
+    <div>
+        <h1>Write a comment</h1>
+        <form method="POST" enctype="multipart/form-data">
+            <label for="comment_post">Post</label>
+            <input name="comment_post" type="text" value="{{post.id}}" readonly> <br>
+            <label for="comment_user">Nickname</label>
+            <input name="comment_user" type="text" value="{{curent_user.id}}" readonly> <br>   
+            <label for="text">Text</label>
+            <input name="text" type="text"> <br>    
+            <label for="photo">Upload photo</label>
+            <input name="photo" type="file"> <br>   
+            <button>Submit</button>
+    </div>
+{% endif %}
+
+
+{% endblock %}

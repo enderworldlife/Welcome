@@ -1,0 +1,26 @@
+<html>
+    
+<div>
+    
+    <div>
+        <h1>@{{user.nickname}}</h1>
+
+        <h1>{{user.name}} {{user.surname}}</h1>
+        {% if user.admin %}
+            <h1>You are admin</h1>
+        {% endif %}
+    </div>
+    <div>
+        <a href="/">Back to home</a>
+        <a href="/logout">Logout</a>
+            
+    </div>
+</div>
+        
+</html>
+
+
+
+
+
+
