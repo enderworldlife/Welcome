@@ -5,11 +5,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import os
 import datetime
 
-
 app = Flask(__name__)
 
 #Data Base 
-#___________________________________________________________
+#________________________________________
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///mydb.db"
 app.secret_key = "D-P6rG1w6RO8E40eMjFcAUD_tIuIgAG902e2rP4aDVqah56wmfa0sjyI0LgpJrYw"
@@ -46,10 +45,28 @@ class Comment(db.Model):
     post_id = db.Column(db.Integer, nullable=False)
     date = db.Column(db.String(16), nullable=False) 
 
+class Chat(db.Model):
+    __table_args__ = {'sqlite_autoincrement': True}
+    id = db.Column(db.Integer, primary_key=True)
+    user1_id = db.Column(db.Integer, nullable=False)
+    user2_id = db.Column(db.Integer, nullable=False)
+
+class Message(db.Model):
+    __table_args__ = {'sqlite_autoincrement': True}
+    id = db.Column(db.Integer, primary_key=True)
+    chat_id = db.Column(db.Integer, nullable=False)
+    sender_id = db.Column(db.Integer, nullable=False)
+    text = db.Column(db.Text, nullable=False)
+    date = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+
+
 with app.app_context():
     db.create_all()
-#___________________________________________________________
+#___________________________________________________________________
 
+@app.route('/about')
+def about():
+    return render_template('./pages/about.html')
 
 #Main
 @app.route('/')
@@ -71,18 +88,28 @@ def logout():
 @app.route('/my_profile')
 def my_profile():
     user = User.query.get(session['user_id'])
-    return render_template('./authentication/my_profile.html', user=user)
+    posts = db.session.query(Post,User).join(User, Post.user_id == User.id).filter(Post.user_id == user.id).order_by(desc(Post.date)).all()
+    return render_template('./authentication/my_profile.html', user=user, posts=posts)
 @app.route('/profile/<int:id>')
 def profile(id):
     user = User.query.get(id)
-    return render_template('./authentication/profile.html', user=user)
-
-
-
-
+    posts = db.session.query(Post,User).join(User, Post.user_id == User.id).filter(Post.user_id == id).order_by(desc(Post.date)).all()
+    return render_template('./authentication/profile.html', user=user, posts=posts)
+@app.route('/admin_users_manager')
+def admin_users_manager():
+    curent_user = None
+    logged = False
+    users = db.session.query(User)
+    if 'user_id' in session:
+        logged = True
+        curent_user = User.query.get(session['user_id'])
+        if curent_user.admin == 1:
+            return render_template('./authentication/admin_users_manager.html',users=users,logged=logged, curent_user=curent_user)
+        else:
+            return "Aa"
 
 #Post
-#_______________________________________________________
+#_________________________________________________
 @app.route('/posts')
 def posts():
     curent_user = None
@@ -125,6 +152,7 @@ def post(id):
 
     return render_template('./post/post.html', post=post, user=user, id=id, logged=logged, curent_user=curent_user, comments=comments)
     
+
 
 
 @app.route('/create_post', methods=["POST", "GET"])
@@ -184,17 +212,6 @@ def update_post(id):
         return redirect(url_for('posts'))
     return render_template('./post/update_post.html', post=post)
         
-
-
-
-
-
-
-
-
-
-
-
 
 
 #Authentication
@@ -258,10 +275,64 @@ def login():
     return render_template('./authentication/login.html', message=message)
 
 
-if __name__ == "__main__":
-    app.run(debug=True)
+#Chats
+#___________________________________________
+@app.route('/chats')
+def chats():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
 
-# host="192.168.0.16", port=5000, 
+    user_id = session['user_id']
+
+    chats = Chat.query.filter(
+        (Chat.user1_id == user_id) |
+        (Chat.user2_id == user_id)
+    ).all()
+
+    users = []
+    for chat in chats:
+        if chat.user1_id == user_id:
+            users.append(User.query.get(chat.user2_id))
+        else:
+            users.append(User.query.get(chat.user1_id))
+
+    return render_template('chat/chats.html', users=users)
+
+
+@app.route('/chat/<int:user_id>', methods=['GET', 'POST'])
+def chat(user_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    current_user_id = session['user_id']
+
+    chat = Chat.query.filter(
+        ((Chat.user1_id == current_user_id) & (Chat.user2_id == user_id)) |
+        ((Chat.user1_id == user_id) & (Chat.user2_id == current_user_id))
+    ).first()
+
+    if not chat:
+        chat = Chat(user1_id=current_user_id, user2_id=user_id)
+        db.session.add(chat)
+        db.session.commit()
+
+    if request.method == 'POST':
+        text = request.form['text']
+        msg = Message(chat_id=chat.id, sender_id=current_user_id, text=text)
+        db.session.add(msg)
+        db.session.commit()
+        return redirect(url_for('chat', user_id=user_id))
+
+    messages = Message.query.filter_by(chat_id=chat.id).order_by(Message.date).all()
+    user = User.query.get(user_id)
+
+    return render_template('chat/chat.html', messages=messages, user=user)
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)
+
+
 
 
 

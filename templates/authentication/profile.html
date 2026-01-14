@@ -1,21 +1,89 @@
-<html>
-    
-<div>
-    
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="../static/main.css">
+
+</head>
+
+<body>
     <div>
-        <h1>@{{user.nickname}}</h1>
 
-        <h1>{{user.name}} {{user.surname}}</h1>
-        {% if user.admin %}
-            <h1>Admin</h1>
-        {% endif %}
+        <div>
+            <h1>User profile:</h1>
+            <h1>Nickname: @{{user.nickname}}</h1>
+
+            <h1>Name: {{user.name}} {{user.surname}}</h1>
+            {% if user.admin %}
+            <h1 style="color: yellow;">Admin</h1>
+            {% endif %}
+            <a href="{{ url_for('chat', user_id=user.id) }}">Message</a>
+            
+        </div>
     </div>
-</div>
-        
+    <h1>User posts</h1>
+    <div>
+            <div style="display: flex; width: 100%;">
+                <div style="width: 50%;">
+                    {% for post, user in posts %}
+                    {% if loop.index0 % 2 == 0 %}
+                    <div>
+                        {% if post.upload.endswith('.mp4') or post.upload.endswith('.webm') %}
+                            <video width="100%" controls>
+                            <source src="../{{post.upload}}" type="video/mp4">
+                            <source src="../{{post.upload}}" type="video/webm">
+                            </video>
+                        {% elif post.upload.endswith('.mp3') %}
+                            <audio controls>
+                                <source src="../{{post.upload}}" type="audio/mpeg">
+                            </audio> <br>
+                        {% else %}
+                            <img width="100%" src="../{{post.upload}}" alt=""> <br>
+                        {% endif %}
+                        <a style="color: coral;" href="/post/{{post.id}}">Title: {{post.title}}</a> <br>
+                        <a style="color:blue;" href="/profile/{{user.id}}">User: {{user.nickname}}</a>
+                        <p>Text: {{post.text}}</p>
+                        <p>Date: {{post.date}}</p>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+
+                </div>
+                <div style="width: 50%;">
+                    {% for post, user in posts %}
+                    {% if loop.index0 % 2 == 1 %}
+                    <div>
+                        {% if post.upload.endswith('.mp4') or post.upload.endswith('.webm') %}
+                            <video width="100%" controls>
+                            <source src="../{{post.upload}}" type="video/mp4">
+                            <source src="../{{post.upload}}" type="video/webm">
+                            </video>
+                        {% elif post.upload.endswith('.mp3') %}
+                            <audio controls>
+                                <source src="../{{post.upload}}" type="audio/mpeg">
+                            </audio> <br>
+                        {% else %}
+                            <img width="100%" src="../{{post.upload}}" alt=""> <br>
+                        {% endif %}
+                        <a style="color: coral;" href="/post/{{post.id}}">Title: {{post.title}}</a> <br>
+                        <a style="color:blue;" href="/profile/{{user.id}}">User: {{user.nickname}}</a>
+                        <p>Text: {{post.text}}</p>
+                        <p>Date: {{post.date}}</p>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+</body>
+
 </html>
-
-
-
-
-
-

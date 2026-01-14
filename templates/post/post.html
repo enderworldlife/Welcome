@@ -6,7 +6,18 @@ Post
 {% block body %}
 
 <h1>Post</h1>
-<img width="50%" src="../{{post.upload}}" alt="">
+{% if post.upload.endswith('.mp4') or post.upload.endswith('.webm') %}
+    <video width="50%" controls>
+    <source src="../{{post.upload}}" type="video/mp4">
+    <source src="../{{post.upload}}" type="video/webm">
+    </video>
+{% elif post.upload.endswith('.mp3') %}
+    <audio width="50%" controls>
+        <source src="../{{post.upload}}" type="audio/mpeg">
+    </audio> <br>
+{% else %}
+    <img width="50%" src="../{{post.upload}}" alt=""> <br>
+{% endif %}
 <p>Title: {{post.title}}</p>
 <p>User: {{user.nickname}}</p>
 
@@ -26,7 +37,14 @@ Post
     <p>Comments: </p>
     {% for comment, user in comments %}
     <div>
-        <img width="25%" src="../{{comment.upload}}" alt=""> <br>
+        {% if post.upload.endswith('.mp4') or post.upload.endswith('.webm') %}
+            <video width="25%" controls>
+            <source src="../{{comment.upload}}" type="video/mp4">
+            <source src="../{{comment.upload}}" type="video/webm">
+            </video>
+        {% else %}
+            <img width="25%" src="../{{comment.upload}}" alt=""> <br>
+        {% endif %}
         <p>User: {{user.nickname}}</p>
         <p>Text: {{comment.text}}</p>
         <p>Date: {{comment.date}}</p>

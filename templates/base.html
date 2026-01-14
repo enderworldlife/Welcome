@@ -7,71 +7,45 @@
         {% block title %}
         {% endblock %}
     </title>
+    <link rel="stylesheet" href="../static/main.css">
+    <script src="../static/index.js"></script>
     <style>
-        body {
-            margin: 0;
-            color: white;
-            background-color: rgb(20, 20, 20);
-            /* width: 100px; */
-
-        }
-        header {
-            padding: 10px;
-
-
-        }
-        div {
-            padding: 10px;
-        }
-        a {
-            color: white;
-            margin: 20px;
-
-            /* padding: 10px; */
-            text-decoration: none;
-        }
-        p {
-            margin: 20px;
-        }
-        h1 {
-            margin: 20px;
-
-        }
-        label {
-            margin: 20px;
-
-        }
-        button {
-            margin: 20px;
-
-        }
-
+        
     </style>
+
+
 </head>
 <body>
 
     <!-- это файл base.html  -->
     <header>
         <div style="display: flex; align-items: center;">
-            <h1>Welcome to my site</h1>
+            <h1>Forge Swords</h1>
         
             {% if logged %}
-            <a href="/my_profile">@{{curent_user.nickname}}</a>
-            {% elif not logged %}
-            <a href="/signup">Signup</a>
+                <a href="/my_profile">@{{curent_user.nickname}}</a>
+                <a href="{{ url_for('chats') }}">Chats</a>
+                {% if curent_user.admin %}
+                    <a style="color: yellow;" href="/admin_users_manager">You are admin</a>
+                {% endif %}
+            {% endif %}
+            
+            {% if not logged %}
+               <a href="/signup">Signup</a>
             <a href="/login">Login</a>
+                
             {% endif %}
-            {% if curent_user.admin %}
-            <p style="color: yellow;">You are admin</p>
-            {% endif %}
+
+
         </div>
         <div>
             <a href="/">Home</a>
             <a href="/posts">Posts</a>
-            <a href="/about">About</a>
+
             {% if logged %}
             <a href="/create_post">Create post</a>
             {% endif %}
+
         </div>
           
     </header>

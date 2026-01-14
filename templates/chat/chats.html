@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chats</title>
+    <link rel="stylesheet" href="../static/main.css">
+
+</head>
+
+<body>
+    <h2>Chats</h2>
+
+    {% if users %}
+    <ul>
+        {% for user in users %}
+        <li>
+            <a href="{{ url_for('chat', user_id=user.id) }}">
+                {{ user.nickname }}
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>No chats yet</p>
+    {% endif %}
+</body>
+
+</html>
